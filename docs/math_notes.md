@@ -94,8 +94,9 @@ $$
 \mathrm{EUE}  = \sum_s p_s \operatorname{E}[\max(d_s - C, 0)].
 $$
 
-Both are expressed in "per period" units; multiply by `periods_per_unit`
-(e.g. 8760 for hours per year) for reporting.
+Both are expressed in "per period" units; multiply by `periods_per_year`
+(e.g. 8760 for hours per year from an hourly snapshot, 365 for days per
+year) for reporting.
 
 ## 7. Backward induction (MPE skeleton)
 

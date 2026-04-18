@@ -14,7 +14,6 @@ from capgame.mechanisms.forward_capacity import (
     ProcurementCurve,
     clear_auction,
 )
-from capgame.mechanisms.reliability_options import ReliabilityOption
 
 
 @pytest.fixture
@@ -101,37 +100,4 @@ class TestForwardCapacityMarket:
         assert np.all(out.capacity_payments == 0.0)
 
 
-class TestReliabilityOptions:
-    def test_high_strike_collapses_to_energy_only(self, demand, firms) -> None:
-        eq = solve_constrained(demand, firms)
-        caps = [f.capacity for f in firms]
-        out = ReliabilityOption(premium=0.0, strike_price=1e9).apply(eq, caps)
-        np.testing.assert_allclose(out.net_profits, eq.profits)
-
-    def test_zero_strike_behaves_like_capacity_payment_minus_spread(self, demand, firms) -> None:
-        """At K=0, refund equals P(Q)*cap. Net effect: premium - P(Q) per MW."""
-        eq = solve_constrained(demand, firms)
-        caps = np.array([f.capacity for f in firms])
-        premium = 15.0
-        out = ReliabilityOption(premium=premium, strike_price=0.0).apply(eq, caps)
-        expected_extra = (premium - eq.price) * caps
-        extra = out.net_profits - eq.profits
-        np.testing.assert_allclose(extra, expected_extra, atol=1e-8)
-
-    def test_strike_above_price_means_no_refund(self, demand, firms) -> None:
-        eq = solve_constrained(demand, firms)
-        caps = [f.capacity for f in firms]
-        out = ReliabilityOption(premium=10.0, strike_price=eq.price + 1.0).apply(eq, caps)
-        assert np.all(out.refunds == 0.0)
-
-    def test_coverage_scales_linearly(self, demand, firms) -> None:
-        eq = solve_constrained(demand, firms)
-        caps = [f.capacity for f in firms]
-        full = ReliabilityOption(premium=10.0, strike_price=20.0, coverage=1.0).apply(eq, caps)
-        half = ReliabilityOption(premium=10.0, strike_price=20.0, coverage=0.5).apply(eq, caps)
-        np.testing.assert_allclose(full.capacity_payments, 2.0 * half.capacity_payments)
-        np.testing.assert_allclose(full.refunds, 2.0 * half.refunds)
-
-    def test_invalid_coverage_rejected(self) -> None:
-        with pytest.raises(ValueError):
-            ReliabilityOption(premium=1.0, strike_price=1.0, coverage=1.5)
+# Reliability-option tests live in tests/test_reliability_options.py.

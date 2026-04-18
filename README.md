@@ -37,8 +37,8 @@ Requires Python >= 3.10.
 ## Quick start
 
 ```python
-from capgame.game.cournot import LinearDemand, Firm, solve_constrained
-from capgame.mechanisms.reliability_options import ReliabilityOption, apply as ro_apply
+from capgame.game.cournot import Firm, LinearDemand, solve_constrained
+from capgame.mechanisms.reliability_options import ReliabilityOption
 
 demand = LinearDemand(a=100.0, b=1.0)
 firms = [
@@ -50,8 +50,9 @@ firms = [
 eq = solve_constrained(demand, firms)
 print(f"Price={eq.price:.2f}  HHI={eq.hhi:.0f}")
 
-option = ReliabilityOption(premium=8.0, strike_price=50.0)
-ro_profits = ro_apply(eq, option, capacities=[f.capacity for f in firms])
+option = ReliabilityOption(premium=8.0, strike_price=50.0, hours_per_period=1.0)
+outcome = option.apply(eq, capacities=[f.capacity for f in firms])
+print(outcome.net_profits)
 ```
 
 Run the dashboard:
