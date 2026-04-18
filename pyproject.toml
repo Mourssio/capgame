@@ -1,0 +1,129 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "capgame"
+version = "0.1.0"
+description = "Strategic capacity-market simulator: game-theoretic, stochastic, and optimization-based comparison of electricity market capacity mechanisms."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Omar Mourssi" }]
+keywords = [
+    "electricity-markets",
+    "capacity-adequacy",
+    "game-theory",
+    "cournot",
+    "stochastic-dynamic-programming",
+    "reliability-options",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pandas>=2.1",
+]
+
+[project.optional-dependencies]
+app = [
+    "streamlit>=1.30",
+    "plotly>=5.18",
+    "altair>=5.2",
+]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "hypothesis>=6.90",
+    "ruff>=0.3",
+    "black>=24.2",
+    "mypy>=1.8",
+    "pre-commit>=3.6",
+]
+docs = [
+    "jupyter>=1.0",
+    "nbformat>=5.9",
+    "matplotlib>=3.8",
+]
+
+[project.urls]
+Homepage = "https://github.com/Mourssio/capgame"
+Repository = "https://github.com/Mourssio/capgame"
+Issues = "https://github.com/Mourssio/capgame/issues"
+
+[project.scripts]
+capgame-app = "capgame.app.streamlit_app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["capgame"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra --strict-markers --strict-config"
+testpaths = ["tests"]
+filterwarnings = [
+    "error::UserWarning",
+    "error::RuntimeWarning",
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["capgame"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
+]
+ignore = [
+    "N803", # argument name should be lowercase (we use math conventions: Q, N)
+    "N806", # variable in function should be lowercase (same reason)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["N802", "N803", "N806"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unreachable = true
+ignore_missing_imports = true
