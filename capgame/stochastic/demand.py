@@ -77,16 +77,12 @@ class MarkovChain:
         P = np.asarray(transition_matrix, dtype=float)
         n = len(states)
         if P.ndim != 2 or P.shape[0] != n or P.shape[1] != n:
-            raise ValueError(
-                f"transition_matrix must be square of size {n}, got shape {P.shape}"
-            )
+            raise ValueError(f"transition_matrix must be square of size {n}, got shape {P.shape}")
         if np.any(P < 0):
             raise ValueError("transition_matrix must be nonnegative.")
         row_sums = P.sum(axis=1)
         if not np.allclose(row_sums, 1.0, atol=1e-8):
-            raise ValueError(
-                f"transition_matrix rows must sum to 1, got row sums {row_sums}"
-            )
+            raise ValueError(f"transition_matrix rows must sum to 1, got row sums {row_sums}")
 
         self._states: tuple[DemandState, ...] = tuple(states)
         self._P: np.ndarray = P

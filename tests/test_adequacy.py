@@ -144,7 +144,5 @@ class TestEUE:
         demand = [(60.0, 0.4), (130.0, 0.6)]
         exact = expected_unserved_energy(caps, fors, demand)
         rng = np.random.default_rng(7)
-        mc = expected_unserved_energy_monte_carlo(
-            caps, fors, demand, n_samples=100_000, rng=rng
-        )
+        mc = expected_unserved_energy_monte_carlo(caps, fors, demand, n_samples=100_000, rng=rng)
         assert mc == pytest.approx(exact, rel=0.05, abs=0.2)

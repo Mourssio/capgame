@@ -108,9 +108,7 @@ class TestReliabilityOptions:
         out = ReliabilityOption(premium=0.0, strike_price=1e9).apply(eq, caps)
         np.testing.assert_allclose(out.net_profits, eq.profits)
 
-    def test_zero_strike_behaves_like_capacity_payment_minus_spread(
-        self, demand, firms
-    ) -> None:
+    def test_zero_strike_behaves_like_capacity_payment_minus_spread(self, demand, firms) -> None:
         """At K=0, refund equals P(Q)*cap. Net effect: premium - P(Q) per MW."""
         eq = solve_constrained(demand, firms)
         caps = np.array([f.capacity for f in firms])
@@ -129,15 +127,9 @@ class TestReliabilityOptions:
     def test_coverage_scales_linearly(self, demand, firms) -> None:
         eq = solve_constrained(demand, firms)
         caps = [f.capacity for f in firms]
-        full = ReliabilityOption(premium=10.0, strike_price=20.0, coverage=1.0).apply(
-            eq, caps
-        )
-        half = ReliabilityOption(premium=10.0, strike_price=20.0, coverage=0.5).apply(
-            eq, caps
-        )
-        np.testing.assert_allclose(
-            full.capacity_payments, 2.0 * half.capacity_payments
-        )
+        full = ReliabilityOption(premium=10.0, strike_price=20.0, coverage=1.0).apply(eq, caps)
+        half = ReliabilityOption(premium=10.0, strike_price=20.0, coverage=0.5).apply(eq, caps)
+        np.testing.assert_allclose(full.capacity_payments, 2.0 * half.capacity_payments)
         np.testing.assert_allclose(full.refunds, 2.0 * half.refunds)
 
     def test_invalid_coverage_rejected(self) -> None:

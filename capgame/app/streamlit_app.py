@@ -95,9 +95,7 @@ def _build_ui() -> None:
         with col_out:
             df = run_static_mechanism_comparison(cfg)
             st.dataframe(df.style.format(precision=2), use_container_width=True)
-            st.line_chart(
-                df.set_index("mechanism")[["producer_surplus", "welfare"]]
-            )
+            st.line_chart(df.set_index("mechanism")[["producer_surplus", "welfare"]])
 
     with tab_explore:
         st.header("Scenario Explorer")
@@ -127,9 +125,9 @@ def _build_ui() -> None:
             "Forward capacity": ForwardCapacityMarket(
                 curve=ProcurementCurve(cap_target=80.0, slope=1.5)
             ).apply(eq, caps),
-            "Reliability options": ReliabilityOption(
-                premium=10.0, strike_price=45.0
-            ).apply(eq, caps),
+            "Reliability options": ReliabilityOption(premium=10.0, strike_price=45.0).apply(
+                eq, caps
+            ),
         }
 
         st.subheader("Equilibrium")
@@ -175,14 +173,12 @@ def _build_ui() -> None:
             demand_distribution=[(peak, 1.0)],
         )
         st.write(
-            f"**Reserve margin**: {rm * 100:.1f}%  |  "
-            f"**LOLP** (1 period, FOR=5%): {lole:.4f}"
+            f"**Reserve margin**: {rm * 100:.1f}%  |  " f"**LOLP** (1 period, FOR=5%): {lole:.4f}"
         )
 
     with tab_about:
         st.header("About CapGame")
-        st.markdown(
-            """
+        st.markdown("""
 CapGame is an open-source research framework for analyzing long-term generation
 capacity adequacy in restructured electricity markets. It reproduces and extends
 the three-stage dynamic Cournot game of **Khalfallah (2011)**, providing a
@@ -197,8 +193,7 @@ extensions are in progress -- see `docs/ROADMAP.md`.
 
 Author: Omar Mourssi, University of Toronto ECE.
 License: MIT.
-"""
-        )
+""")
 
 
 try:

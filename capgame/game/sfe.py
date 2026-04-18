@@ -18,6 +18,4 @@ def solve_sfe(
     firms: Sequence[Firm],
 ) -> CournotEquilibrium:
     """Solve a linear supply-function equilibrium. Not yet implemented."""
-    raise NotImplementedError(
-        "SFE solver is planned for a future phase. See docs/ROADMAP.md."
-    )
+    raise NotImplementedError("SFE solver is planned for a future phase. See docs/ROADMAP.md.")

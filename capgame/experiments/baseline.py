@@ -48,9 +48,7 @@ def run_static_mechanism_comparison(config: BaselineConfig | None = None) -> pd.
         "Energy-only": EnergyOnly().apply(eq, caps),
         "Capacity payment": CapacityPayment(rho=cfg.capacity_payment_rho).apply(eq, caps),
         "Forward capacity": ForwardCapacityMarket(
-            curve=ProcurementCurve(
-                cap_target=cfg.procurement_target, slope=cfg.procurement_slope
-            )
+            curve=ProcurementCurve(cap_target=cfg.procurement_target, slope=cfg.procurement_slope)
         ).apply(eq, caps),
         "Reliability options": ReliabilityOption(
             premium=cfg.option_premium, strike_price=cfg.option_strike

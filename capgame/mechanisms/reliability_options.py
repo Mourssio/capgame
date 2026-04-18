@@ -87,7 +87,5 @@ def apply(
     if option is None:
         if premium is None or strike_price is None:
             raise ValueError("Supply `option=` or both `premium=` and `strike_price=`.")
-        option = ReliabilityOption(
-            premium=premium, strike_price=strike_price, coverage=coverage
-        )
+        option = ReliabilityOption(premium=premium, strike_price=strike_price, coverage=coverage)
     return option.apply(equilibrium, capacities)
