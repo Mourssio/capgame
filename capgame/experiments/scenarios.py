@@ -148,6 +148,92 @@ class ScenarioResult:
     per_firm_expected_net_profit: np.ndarray = field(repr=False)
 
 
+@dataclass(frozen=True)
+class MissingMoneyReport:
+    """Per-firm and fleet annualized missing-money diagnostic.
+
+    Missing money measures the gap between a firm's annualized net
+    revenue under the current mechanism and its annualized fixed-cost
+    revenue requirement. Negative values mean the firm cannot justify
+    its fixed cost from market revenues alone and would exit in the
+    long run; positive values mean the mechanism is paying a
+    rent above break-even.
+
+    Attributes
+    ----------
+    per_firm_gap_per_mw_year
+        ``(net_annual_revenue - fixed_cost * capacity) / capacity`` in
+        $/MW-yr, one entry per firm in the same order as
+        ``config.firms``. Negative = missing money.
+    per_firm_annual_net_revenue
+        Expected net revenue (energy margin + capacity payments -
+        refunds) annualized to $/yr.
+    per_firm_annual_fixed_requirement
+        ``fixed_cost * capacity`` in $/yr.
+    fleet_gap_per_year
+        Sum of per-firm gaps weighted by capacity; total fleet
+        missing money in $/yr. Negative = fleet is underpaid.
+    fraction_firms_short
+        Share of firms with a negative gap.
+    largest_deficit_firm
+        Name of the firm with the most negative gap (``None`` if all
+        non-negative).
+    """
+
+    per_firm_gap_per_mw_year: np.ndarray = field(repr=False)
+    per_firm_annual_net_revenue: np.ndarray = field(repr=False)
+    per_firm_annual_fixed_requirement: np.ndarray = field(repr=False)
+    fleet_gap_per_year: float
+    fraction_firms_short: float
+    largest_deficit_firm: str | None
+
+
+def missing_money(
+    result: ScenarioResult,
+    periods_per_year: float = 8760.0,
+) -> MissingMoneyReport:
+    """Compute annualized missing money for every firm in a scenario.
+
+    ``per_firm_expected_net_profit`` from :func:`run_scenario` is the
+    per-period expected net profit in dollars. We annualize by
+    multiplying by ``periods_per_year`` (default 8760 for hourly
+    snapshots) and compare against each firm's fixed-cost revenue
+    requirement ``fixed_cost * capacity``.
+
+    The result is the object that makes mechanism comparison concrete:
+    a mechanism that closes a large missing-money gap with a small
+    consumer-cost impact is Pareto-preferable to one that overpays.
+    """
+    if periods_per_year <= 0:
+        raise ValueError(f"periods_per_year must be > 0, got {periods_per_year}")
+
+    firms = result.config.firms
+    net_annual = np.asarray(result.per_firm_expected_net_profit, dtype=float) * periods_per_year
+    fixed_req = np.array([f.fixed_cost * f.capacity for f in firms], dtype=float)
+    caps = np.array([f.capacity for f in firms], dtype=float)
+
+    gap_total = net_annual - fixed_req
+    with np.errstate(divide="ignore", invalid="ignore"):
+        gap_per_mw = np.where(caps > 0, gap_total / caps, 0.0)
+
+    short_mask = gap_total < 0.0
+    fraction_short = float(short_mask.mean()) if short_mask.size else 0.0
+    if short_mask.any():
+        worst_idx = int(np.argmin(gap_total))
+        worst_name = firms[worst_idx].name or f"firm_{worst_idx}"
+    else:
+        worst_name = None
+
+    return MissingMoneyReport(
+        per_firm_gap_per_mw_year=gap_per_mw,
+        per_firm_annual_net_revenue=net_annual,
+        per_firm_annual_fixed_requirement=fixed_req,
+        fleet_gap_per_year=float(gap_total.sum()),
+        fraction_firms_short=fraction_short,
+        largest_deficit_firm=worst_name,
+    )
+
+
 def _build_residual_demand(
     demand: LinearDemand,
     renewable_state: RenewableState | None,
