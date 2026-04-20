@@ -11,14 +11,28 @@ from capgame.game.cournot import (
     CournotEquilibrium,
     Firm,
     LinearDemand,
+    consumer_surplus,
+    solve,
     solve_constrained,
     solve_unconstrained,
+)
+from capgame.game.market_structure import (
+    MarketStructure,
+    solve_cartel,
+    solve_market,
+    solve_monopoly,
 )
 
 __all__ = [
     "CournotEquilibrium",
     "Firm",
     "LinearDemand",
+    "MarketStructure",
+    "consumer_surplus",
+    "solve",
+    "solve_cartel",
     "solve_constrained",
+    "solve_market",
+    "solve_monopoly",
     "solve_unconstrained",
 ]

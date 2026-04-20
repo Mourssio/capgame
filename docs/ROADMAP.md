@@ -57,8 +57,11 @@ the project proposal (Section 6).
 
 ## Phase 6 -- Dashboard (Week 13)
 
-- [~] Streamlit app with four tabs (Baseline, Comparator, Explorer, About)
-- [ ] Plotly/Altair figures with consistent styling
+- [x] Streamlit app organized around the four research questions (Home, RQ1-RQ4, Methodology)
+- [x] Sidebar parameters with tooltips, session-state persistence, and URL deep-linking
+- [x] Plotly figures (no dataframes in narrative pages; tables in expanders)
+- [x] Split `capgame/app/cli.py` (launcher) and `capgame/app/ui.py` (UI)
+- [x] Single-entry-point `ScenarioConfig -> ScenarioResult` consumed by the UI
 - [ ] Streamlit Cloud deployment URL in README
 
 ## Phase 7 -- Paper and Release (Weeks 14-16)
@@ -69,6 +72,8 @@ the project proposal (Section 6).
 
 ## Phase 8 -- Research Extensions (post-v1)
 
-- [ ] Supply-function equilibrium (`game.sfe`) for RQ beyond Cournot
-- [ ] Full bilevel solver with endogenous strike (`game.bilevel`) for RQ4
+- [ ] Supply-function equilibrium (`game.sfe`) for RQ beyond Cournot (stub raises informative error)
+- [x] Grid-search bilevel solver with `solve_endogenous_strike` convenience (RQ4)
+- [x] Market-structure variants `solve_oligopoly / solve_cartel / solve_monopoly` (RQ3)
+- [ ] Full MPCC / KKT bilevel with interior-point (upgrade path from grid search)
 - [ ] Storage and demand-response as first-class capacity technologies

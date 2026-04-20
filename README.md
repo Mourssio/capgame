@@ -14,13 +14,18 @@ competition, and alternative market structures.
 ## Features
 
 - **Nash–Cournot solver** (closed-form + capacity-constrained best-response iteration)
+- **Market-structure variants**: oligopoly, cartel, monopoly (used by RQ3)
 - **Four capacity mechanisms**: energy-only, capacity payment, forward capacity
-  auction, reliability options
+  auction, reliability options — all satisfying a single `Mechanism` Protocol
 - **Stochastic demand** as a finite-state Markov chain
-- **Stochastic dynamic programming** via backward induction on a scenario tree
-- **Adequacy metrics**: deterministic reserve margin, LOLE, EUE (with forced outages)
-- **Interactive Streamlit dashboard** for side-by-side mechanism comparison
-- Research-grade project hygiene: typed code, tests, pre-commit, CI
+- **Correlated renewables** as `MarkovChain[RenewableState]`
+- **Stochastic dynamic programming** via backward induction
+- **Bilevel / endogenous strike** solver for RQ4
+- **Adequacy metrics**: reserve margin, LOLE, EUE (with forced outages)
+- **One-entry-point scenario runner**: `ScenarioConfig → ScenarioResult`
+- **Interactive Streamlit dashboard** organized around the four research
+  questions, with URL-shareable parameter state
+- Research-grade project hygiene: typed code, 149 tests, pre-commit, CI
 
 ## Installation
 
@@ -36,47 +41,59 @@ Requires Python >= 3.10.
 
 ## Quick start
 
+The single-entry-point scenario runner:
+
 ```python
-from capgame.game.cournot import Firm, LinearDemand, solve_constrained
+from capgame.experiments import ScenarioConfig, run_scenario
+from capgame.game.cournot import Firm, LinearDemand
 from capgame.mechanisms.reliability_options import ReliabilityOption
 
-demand = LinearDemand(a=100.0, b=1.0)
-firms = [
-    Firm(marginal_cost=10.0, capacity=30.0),
-    Firm(marginal_cost=12.0, capacity=25.0),
-    Firm(marginal_cost=15.0, capacity=40.0),
-]
+cfg = ScenarioConfig(
+    demand=LinearDemand(a=100.0, b=1.0),
+    firms=(
+        Firm(marginal_cost=10.0, capacity=30.0, name="Baseload"),
+        Firm(marginal_cost=25.0, capacity=25.0, name="Midmerit"),
+        Firm(marginal_cost=50.0, capacity=20.0, name="Peaker"),
+    ),
+    mechanism=ReliabilityOption(premium=8.0, strike_price=50.0),
+    outage_rates=(0.05, 0.05, 0.05),
+    target_reserve_margin=0.15,
+)
 
-eq = solve_constrained(demand, firms)
-print(f"Price={eq.price:.2f}  HHI={eq.hhi:.0f}")
-
-option = ReliabilityOption(premium=8.0, strike_price=50.0, hours_per_period=1.0)
-outcome = option.apply(eq, capacities=[f.capacity for f in firms])
-print(outcome.net_profits)
+result = run_scenario(cfg)
+print(f"Price     = ${result.expected_price:.2f}/MWh")
+print(f"Welfare   = ${result.expected_welfare:,.0f}")
+print(f"LOLE      = {result.adequacy.lole_hours_per_year:.2f} h/yr")
+print(f"Reserve margin {result.adequacy.reserve_margin*100:.1f}% "
+      f"vs target {cfg.target_reserve_margin*100:.0f}%")
 ```
 
 Run the dashboard:
 
 ```bash
-streamlit run capgame/app/streamlit_app.py
+streamlit run capgame/app/ui.py
 # or
 capgame-app
 ```
+
+The dashboard is organized around the four research questions (RQ1–RQ4)
+and the methodology page. Every slider is URL-synchronized, so you can
+share a configured scenario as a link.
 
 ## Repository layout
 
 ```
 capgame/
 ├── capgame/
-│   ├── game/            # L1 equilibrium solvers (cournot, sfe, bilevel, mpe)
+│   ├── game/            # L1 equilibrium solvers (cournot, market_structure, bilevel, sfe stub, mpe)
 │   ├── stochastic/      # L2 uncertainty processes (demand, renewables, outages)
-│   ├── mechanisms/      # L3 market designs (energy_only, cap_payment, FCM, RO)
+│   ├── mechanisms/      # L3 market designs + Mechanism Protocol
 │   ├── adequacy/        # L4 reliability metrics (reserve_margin, LOLE, EUE)
 │   ├── optimization/    # L5 numerical methods (MCP, SDP, calibration)
-│   ├── experiments/     # L6 reproducible scripts
-│   └── app/             # L7 Streamlit dashboard
-├── tests/               # mirrors package structure
-├── docs/                # math notes, review, roadmap
+│   ├── experiments/     # L6 ScenarioConfig → ScenarioResult + baselines
+│   └── app/             # L7 cli.py (launcher) + ui.py (Streamlit UI)
+├── tests/               # mirrors package structure, 149 tests
+├── docs/                # math notes, roadmap
 └── data/                # calibration inputs
 ```
 

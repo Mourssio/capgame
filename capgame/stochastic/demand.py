@@ -1,18 +1,26 @@
 """Finite-state Markov demand process.
 
 Khalfallah's baseline uses a three-state chain {low, mid, high} with a 3x3
-transition matrix. We generalize to an arbitrary finite state space. Each
-state carries a :class:`DemandState` payload that the Cournot subgame
-consumes — specifically the inverse-demand intercept.
+transition matrix. We generalize to an arbitrary finite state space.
+
+:class:`MarkovChain` is generic in its state payload ``S``: a demand chain
+is ``MarkovChain[DemandState]``, a renewable-availability chain is
+``MarkovChain[RenewableState]`` (see :mod:`capgame.stochastic.renewables`),
+and the machinery (transitions, stationary distribution, sampling) is
+shared.  If we later need chains whose payload is neither of those, no
+changes are required here.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Generic, TypeVar
 
 import numpy as np
 import numpy.typing as npt
+
+S = TypeVar("S")
 
 
 @dataclass(frozen=True)
@@ -51,13 +59,15 @@ class DemandState:
         return self.intercept / self.slope
 
 
-class MarkovChain:
-    """Discrete-time, finite-state Markov chain.
+class MarkovChain(Generic[S]):
+    """Discrete-time, finite-state Markov chain, generic in its payload type.
 
     Parameters
     ----------
     states
-        Ordered sequence of :class:`DemandState` instances.
+        Ordered sequence of state payloads. The chain's machinery never
+        inspects the payloads; they are surfaced back to the caller via
+        :attr:`states` and :meth:`state`.
     transition_matrix
         Row-stochastic 2-D array. ``transition_matrix[i, j]`` is the
         probability of moving from state ``i`` to state ``j`` in one step.
@@ -68,7 +78,7 @@ class MarkovChain:
 
     def __init__(
         self,
-        states: Sequence[DemandState],
+        states: Sequence[S],
         transition_matrix: npt.ArrayLike,
         initial_distribution: npt.ArrayLike | None = None,
     ) -> None:
@@ -84,7 +94,7 @@ class MarkovChain:
         if not np.allclose(row_sums, 1.0, atol=1e-8):
             raise ValueError(f"transition_matrix rows must sum to 1, got row sums {row_sums}")
 
-        self._states: tuple[DemandState, ...] = tuple(states)
+        self._states: tuple[S, ...] = tuple(states)
         self._P: np.ndarray = P
 
         if initial_distribution is None:
@@ -104,7 +114,7 @@ class MarkovChain:
         return len(self._states)
 
     @property
-    def states(self) -> tuple[DemandState, ...]:
+    def states(self) -> tuple[S, ...]:
         return self._states
 
     @property
@@ -115,7 +125,7 @@ class MarkovChain:
     def initial_distribution(self) -> np.ndarray:
         return self._pi0.copy()
 
-    def state(self, index: int) -> DemandState:
+    def state(self, index: int) -> S:
         return self._states[index]
 
     def stationary_distribution(self, tol: float = 1e-12) -> np.ndarray:
@@ -177,7 +187,7 @@ def three_state_chain(
     mid: float = 100.0,
     high: float = 120.0,
     persistence: float = 0.6,
-) -> MarkovChain:
+) -> MarkovChain[DemandState]:
     """Convenience factory for a symmetric low/mid/high demand chain.
 
     The transition matrix places ``persistence`` on the diagonal and

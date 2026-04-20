@@ -7,6 +7,7 @@ net profits under the mechanism, along with any consumer payments.
 
 from __future__ import annotations
 
+from capgame.mechanisms.base import Mechanism, MechanismOutcome
 from capgame.mechanisms.capacity_payment import CapacityPayment
 from capgame.mechanisms.energy_only import EnergyOnly
 from capgame.mechanisms.forward_capacity import ForwardCapacityMarket, clear_auction
@@ -16,6 +17,8 @@ __all__ = [
     "CapacityPayment",
     "EnergyOnly",
     "ForwardCapacityMarket",
+    "Mechanism",
+    "MechanismOutcome",
     "ReliabilityOption",
     "clear_auction",
 ]

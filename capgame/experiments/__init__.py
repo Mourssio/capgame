@@ -8,5 +8,19 @@ Streamlit dashboard.
 from __future__ import annotations
 
 from capgame.experiments.baseline import run_static_mechanism_comparison
+from capgame.experiments.scenarios import (
+    AdequacyReport,
+    ScenarioConfig,
+    ScenarioResult,
+    StateOutcome,
+    run_scenario,
+)
 
-__all__ = ["run_static_mechanism_comparison"]
+__all__ = [
+    "AdequacyReport",
+    "ScenarioConfig",
+    "ScenarioResult",
+    "StateOutcome",
+    "run_scenario",
+    "run_static_mechanism_comparison",
+]

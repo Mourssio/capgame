@@ -8,10 +8,35 @@ quantities consumed downstream by the dynamic game and by welfare analysis.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 import numpy.typing as npt
+
+from capgame.game.cournot import CournotEquilibrium
+
+
+@runtime_checkable
+class Mechanism(Protocol):
+    """Structural type shared by every capacity-mechanism implementation.
+
+    All four concrete mechanisms (:class:`~capgame.mechanisms.energy_only.EnergyOnly`,
+    :class:`~capgame.mechanisms.capacity_payment.CapacityPayment`,
+    :class:`~capgame.mechanisms.forward_capacity.ForwardCapacityMarket`,
+    :class:`~capgame.mechanisms.reliability_options.ReliabilityOption`) expose
+    an ``apply(equilibrium, capacities) -> MechanismOutcome`` method. Code in
+    the experiments and UI layers is typed against this Protocol rather than
+    the concrete classes so that new mechanisms plug in without edits
+    downstream.
+    """
+
+    def apply(
+        self,
+        equilibrium: CournotEquilibrium,
+        capacities: Sequence[float],
+    ) -> MechanismOutcome: ...
 
 
 @dataclass(frozen=True)

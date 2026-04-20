@@ -62,7 +62,7 @@ Repository = "https://github.com/Mourssio/capgame"
 Issues = "https://github.com/Mourssio/capgame/issues"
 
 [project.scripts]
-capgame-app = "capgame.app.streamlit_app:main"
+capgame-app = "capgame.app.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["capgame"]
