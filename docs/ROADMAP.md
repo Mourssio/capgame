@@ -34,7 +34,14 @@ the project proposal (Section 6).
 
 ## Phase 4 -- Baseline Reproduction (Weeks 6-7)
 
-- [ ] Calibrated Khalfallah parameter set in `data/`
+- [x] Ontario calibration set from IESO public reports (2024 bundle:
+      hourly demand, HOEP, fuel-level output, monthly generator
+      capability), via `scripts/fetch_ieso.py` and
+      `capgame/calibration/ontario.py`
+- [x] `scripts/validate_ontario.py` compares the model's equilibrium
+      price and fleet to published IESO numbers
+- [ ] Calibrated Khalfallah parameter set in `data/` (for strict
+      replication of the original paper)
 - [ ] 16-year run for each of {energy-only, capacity payment, FCM, RO} x {oligopoly, cartel, monopoly}
 - [ ] Comparison plots (capacity evolution, reserve margin, prices, welfare)
 - [ ] `docs/baseline_reproduction.md` writeup
@@ -50,8 +57,11 @@ the project proposal (Section 6).
 
 ## Phase 5b -- Renewable Uncertainty (Weeks 10-12)
 
-- [~] `stochastic.renewables` with toy two-state chain (placeholder)
-- [ ] Calibration to NREL / Environment Canada data
+- [x] `stochastic.renewables.MarkovChain[RenewableState]` with toy four-state chain
+- [x] Empirical calibration of a four-state renewable chain from IESO
+      `GenOutputbyFuelHourly` data with Laplace-smoothed transitions
+      (`capgame.calibration.renewables_cf.build_renewable_chain`)
+- [ ] Calibration to NREL WIND Toolkit / NSRDB (latent-factor model)
 - [ ] Augmented state (demand, renewables) in SDP
 - [ ] Investment-mix comparison notebook
 
@@ -66,6 +76,18 @@ the project proposal (Section 6).
 
 ## Phase 7 -- Paper and Release (Weeks 14-16)
 
+- [x] Applied Ontario study: missing-money diagnostic, 4x3 mechanism-x-structure matrix, optimal-strike search, sensitivity sweep
+- [x] Executable narrative notebook `notebooks/ontario_missing_money.ipynb`
+- [x] 2024 -> 2050 forecaster (`capgame.forecast`) with Pathway /
+      CapacityTrajectory / FuelPriceTrajectory / FixedCostTrajectory
+      primitives and default IESO-APO-Reference pathway
+- [x] `build_trajectory` + `run_trajectory` per-year scenario evaluation
+      with missing-money and adequacy metrics
+- [x] Monte Carlo uncertainty envelope (`run_monte_carlo`,
+      `summarize_paths`) with P10/P50/P90 bands over demand, gas price,
+      renewable build-out, and SMR schedule
+- [x] `scripts/forecast_ontario.py` CLI emitting tidy CSVs + summary
+- [x] Forecast section (5.1-5.6) appended to the Ontario notebook
 - [ ] Draft working paper (10-12 pages)
 - [ ] arXiv upload
 - [ ] Tag v1.0 release, Zenodo DOI
@@ -77,3 +99,6 @@ the project proposal (Section 6).
 - [x] Market-structure variants `solve_oligopoly / solve_cartel / solve_monopoly` (RQ3)
 - [ ] Full MPCC / KKT bilevel with interior-point (upgrade path from grid search)
 - [ ] Storage and demand-response as first-class capacity technologies
+  (current storage handling is a zero-MC quasi-firm placeholder in the forecaster)
+- [ ] Pathway-conditional renewable Markov chains (re-calibrate CF
+  distributions as wind/solar siting diversifies)
